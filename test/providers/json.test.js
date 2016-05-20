@@ -47,7 +47,6 @@ describe('Test JSON provider', function () {
     provider.should.be.instanceOf(Provider);
   });
 
-
   describe('Testing getRoles', function () {
 
     it('should return simple role', function () {
@@ -90,6 +89,32 @@ describe('Test JSON provider', function () {
       provider.getRoles('joe').should.deepEqual(expected);
     });
 
+    it('should allow user handling to be extended', function () {
+      class CustomJsonProvider extends JsonProvider {
+        getUserRoles(user) {
+          if ( user === 'joe' ) {
+            return ['reader'];
+          } else {
+            return ['guest']
+          }
+        }
+      }
+
+      const joeExpected = {
+        reader: {
+          guest: null
+        }
+      };
+
+      const pamExpected = {
+        guest: null
+      };
+
+      const provider = new CustomJsonProvider(RULES);
+
+      provider.getRoles('joe').should.deepEqual(joeExpected);
+      provider.getRoles('pam').should.deepEqual(pamExpected);
+    });
   });
 
 
