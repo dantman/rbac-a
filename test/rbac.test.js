@@ -514,4 +514,54 @@ describe('Test RBAC', function () {
     });
   });
 
+  describe('Testing deprecated provider interface', function () {
+
+    class MockProvider extends Provider {
+      constructor(testUser) {
+        super();
+
+        this.testUser = testUser;
+      }
+      getRoles(user) {
+        user.should.equal(this.testUser);
+        return {
+          'tester': {
+            'dummy': null
+          }
+        };
+      }
+      getPermissions(role) {
+        if (role === 'tester') {
+          return ['test', 'read'];
+        } else if (role === 'dummy') {
+          return ['idle'];
+        }
+      }
+      getAttributes(role) {
+        if (role === 'tester') {
+          return ['testAttribute'];
+        } else if (role === 'dummy') {
+          return ['dummyAttribute'];
+        }
+      }
+    }
+
+    it('should check basic permission', function () {
+      const testUser = 'tester';
+      const provider = new MockProvider(testUser);
+      const rbac = new RBAC({ provider: provider });
+
+      provider.getAttributes = function () {};  // ignore attributes
+
+      return rbac.check(testUser, 'test').then(function (priority) {
+        priority.should.equal(1);
+      }).then(function () {
+        return rbac.check(testUser, 'idle').then(function (priority) {
+          priority.should.equal(2);
+        });
+      });
+    });
+
+  });
+
 });
