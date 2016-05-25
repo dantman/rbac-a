@@ -478,7 +478,7 @@ describe('Test RBAC', function () {
         if (role === 'tester') {
           return ['dummy'];
         } else {
-          return [];
+          return null;
         }
       }
       getPermissions(role) {
