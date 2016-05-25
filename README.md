@@ -123,7 +123,83 @@ const Provider = require('rbac-a').Provider;
 class CustomProvider extends Provider {
 
   /**
-  Return all the roles available for the given user. The return value
+  Return the list of roles belonging to the given user. The return
+  value must be an array.
+  Return an empty array of the user has no roles.
+
+  Ex: ['role1', 'role2', ... ]
+
+  The method mey return a promise resolving with the
+  expected return value.
+
+  @param user {mixed}
+  @return {Array<string>}
+  */
+  getRoles(user) {
+    return [];   // TODO : implement stub
+  }
+
+  /**
+  Return all roles inherited by the specified role.
+
+  Ex: ['permission1', 'permission2', ... ]
+
+  @param role {mixed}
+  @return {Array<string>}
+  */
+  getInheritedRoles(role) {
+    return [];   // TODO : implement stub
+  }
+
+  /**
+  Return all permissions for the specified role. The return value
+  must be an array. Return an empty array if role is missing or
+  no permission for the specified role.
+
+  Ex: ['permission1', 'permission2', ... ]
+
+  The method mey return a promise resolving with the
+  expected return value.
+
+  @param role {mixed}
+  @return {Array<string>}
+  */
+  getPermissions(role) {
+    return [];   // TODO : implement stub
+  }
+
+  /**
+  Return all attributes for the specified role. The return value must
+  be an array. Return an empty array if role is missing or if no
+  attributes for the specified role.
+
+  Ex: ['attribute1', 'attribute2', ... ]
+
+  The method mey return a promise resolving with the
+  expected return value.
+
+  @param role {mixed}
+  @return {Array<string>}
+  */
+  getAttributes(role) {
+    return [];   // TODO : implement stub
+  }
+
+}
+```
+
+Lower level custom providers may define a role hierarchy instead of implementing `getRoles` and `getInheritedRoles`.
+
+```javascript
+'use strict';
+
+const Provider = require('rbac-a').Provider;
+
+class CustomProvider extends Provider {
+
+
+  /**
+  Return the role hierarchy for the given user. The return value
   must be an object, recursively defining the associated roles for the
   specified user. Return an empty object if user has no roles.
 
@@ -136,14 +212,14 @@ class CustomProvider extends Provider {
         "secondary": ...,
         ...
       }
-  
+
   The method mey return a promise resolving with the
   expected return value.
 
-  @param use {mixed}
+  @param user {mixed}
   @return {Object<string,number>}
   */
-  getRoles(user) {
+  getRoleHierarchy(user) {
     return {};   // TODO : implement stub
   }
 

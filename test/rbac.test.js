@@ -69,7 +69,7 @@ describe('Test RBAC', function () {
   describe('Testing provider', function () {
 
     class MockProvider extends Provider {
-      getRoles(user) {}
+      getRoleHierarchy(user) {}
       getPermissions(role) {}
       getAttributes(role) {}
     }
@@ -136,7 +136,7 @@ describe('Test RBAC', function () {
 
         this.testUser = testUser;
       }
-      getRoles(user) {
+      getRoleHierarchy(user) {
         user.should.equal(this.testUser);
         return {
           'tester': {
@@ -301,7 +301,7 @@ describe('Test RBAC', function () {
       const provider = new MockProvider(testUser);
       const rbac = new RBAC({ provider: provider });
 
-      provider.getRoles = function () {
+      provider.getRoleHierarchy = function () {
         return {
           'foo': null
         };
@@ -334,7 +334,7 @@ describe('Test RBAC', function () {
       const rbac = new RBAC({ provider: provider });
       let errorThrown = false;
 
-      provider.getRoles = function (user) {
+      provider.getRoleHierarchy = function (user) {
         if (user === 'tester') {
           throw new Error('Test');
         } else {
@@ -362,7 +362,7 @@ describe('Test RBAC', function () {
       const rbac = new RBAC({ provider: provider });
       let errorThrown = false;
 
-      provider.getRoles = function (user) {
+      provider.getRoleHierarchy = function (user) {
         return {
           'tester': {
             'dummy': null
@@ -460,7 +460,58 @@ describe('Test RBAC', function () {
       });
     });
 
+  });
 
+  describe('Testing high level provider', function () {
+
+    class MockProvider extends Provider {
+      constructor(testUser) {
+        super();
+
+        this.testUser = testUser;
+      }
+      getRoles(user) {
+        user.should.equal(this.testUser);
+        return ['tester'];
+      }
+      getInheritedRoles(role) {
+        if (role === 'tester') {
+          return ['dummy'];
+        } else {
+          return [];
+        }
+      }
+      getPermissions(role) {
+        if (role === 'tester') {
+          return ['test', 'read'];
+        } else if (role === 'dummy') {
+          return ['idle'];
+        }
+      }
+      getAttributes(role) {
+        if (role === 'tester') {
+          return ['testAttribute'];
+        } else if (role === 'dummy') {
+          return ['dummyAttribute'];
+        }
+      }
+    }
+
+    it('should check basic permission', function () {
+      const testUser = 'tester';
+      const provider = new MockProvider(testUser);
+      const rbac = new RBAC({ provider: provider });
+
+      provider.getAttributes = function () {};  // ignore attributes
+
+      return rbac.check(testUser, 'test').then(function (priority) {
+        priority.should.equal(1);
+      }).then(function () {
+        return rbac.check(testUser, 'idle').then(function (priority) {
+          priority.should.equal(2);
+        });
+      });
+    });
   });
 
 });

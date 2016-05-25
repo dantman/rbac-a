@@ -8,6 +8,7 @@ describe('Test Provider', function () {
     var provider = new Provider();
 
     (function () { provider.getRoles(); }).should.throw('Not implemented');
+    (function () { provider.getInheritedRoles(); }).should.throw('Not implemented');
     (function () { provider.getPermissions(); }).should.throw('Not implemented');
     (function () { provider.getAttributes(); }).should.throw('Not implemented');
   });

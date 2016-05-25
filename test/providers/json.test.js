@@ -47,10 +47,28 @@ describe('Test JSON provider', function () {
     provider.should.be.instanceOf(Provider);
   });
 
-
   describe('Testing getRoles', function () {
 
     it('should return simple role', function () {
+      const expected = ['director', 'reader'];
+
+      let provider = new JsonProvider(RULES);
+
+      provider.getRoleHierarchy('joe').should.eventually.deepEqual(expected);
+    });
+
+    it('should ignore missing user', function () {
+      const expected = {};
+
+      let provider = new JsonProvider(RULES);
+
+      provider.getRoleHierarchy('missing').should.eventually.deepEqual(expected);
+    });
+  });
+
+  describe('Testing getRoleHierarchy', function () {
+
+    it('should return simple role hierarchy', function () {
       const expected = {
         director: {
           editor: {}
@@ -62,7 +80,7 @@ describe('Test JSON provider', function () {
 
       let provider = new JsonProvider(RULES);
 
-      provider.getRoles('joe').should.deepEqual(expected);
+      provider.getRoleHierarchy('joe').should.eventually.deepEqual(expected);
     });
 
     it('should ignore missing user', function () {
@@ -70,7 +88,7 @@ describe('Test JSON provider', function () {
 
       let provider = new JsonProvider(RULES);
 
-      provider.getRoles('missing').should.deepEqual(expected);
+      provider.getRoleHierarchy('missing').should.eventually.deepEqual(expected);
     });
 
     it('should ignore missing roles', function () {
@@ -78,7 +96,7 @@ describe('Test JSON provider', function () {
 
       let provider = new JsonProvider(RULES);
 
-      provider.getRoles('jim').should.deepEqual(expected);
+      provider.getRoleHierarchy('jim').should.eventually.deepEqual(expected);
     });
 
     it('should skip if no rule', function () {
@@ -87,9 +105,35 @@ describe('Test JSON provider', function () {
       let provider = new JsonProvider();
       provider._rules = null;
 
-      provider.getRoles('joe').should.deepEqual(expected);
+      provider.getRoleHierarchy('joe').should.eventually.deepEqual(expected);
     });
 
+    it('should allow user handling to be extended', function () {
+      class CustomJsonProvider extends JsonProvider {
+        getRoles(user) {
+          if ( user === 'joe' ) {
+            return ['reader'];
+          } else {
+            return ['guest']
+          }
+        }
+      }
+
+      const joeExpected = {
+        reader: {
+          guest: null
+        }
+      };
+
+      const pamExpected = {
+        guest: null
+      };
+
+      const provider = new CustomJsonProvider(RULES);
+
+      provider.getRoleHierarchy('joe').should.eventually.deepEqual(joeExpected);
+      provider.getRoleHierarchy('pam').should.eventually.deepEqual(pamExpected);
+    });
   });
 
 
