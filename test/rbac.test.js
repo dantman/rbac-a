@@ -512,6 +512,26 @@ describe('Test RBAC', function () {
         });
       });
     });
+
+    it('should work when getInheritedRoles returns a promise', function () {
+      const testUser = 'tester';
+      const provider = new MockProvider(testUser);
+      const rbac = new RBAC({ provider: provider });
+      const getInheritedRoles = provider.getInheritedRoles;
+
+      provider.getInheritedRoles = function(role) {
+        return Promise.resolve(getInheritedRoles(role));
+      };
+      provider.getAttributes = function () {};  // ignore attributes
+
+      return rbac.check(testUser, 'test').then(function (priority) {
+        priority.should.equal(1);
+      }).then(function () {
+        return rbac.check(testUser, 'idle').then(function (priority) {
+          priority.should.equal(2);
+        });
+      });
+    });
   });
 
   describe('Testing deprecated provider interface', function () {

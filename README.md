@@ -144,6 +144,9 @@ class CustomProvider extends Provider {
 
   Ex: ['permission1', 'permission2', ... ]
 
+  The method mey return a promise resolving with the
+  expected return value.
+
   @param role {mixed}
   @return {Array<string>}
   */
